@@ -6,5 +6,5 @@ python -m dicomhandling T1_3D_TFE-301
 
 - For running the script in a Docker container use:
 
-docker build -t dicom_test
+docker build -t dicom_test \n
 docker run dicom_test
