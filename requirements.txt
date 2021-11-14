@@ -1,0 +1,4 @@
+numpy
+pydicom
+scipy
+Pillow

@@ -3,10 +3,11 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 from PIL import Image
 import sys
-
+import os
 from os import listdir
 from os.path import isfile, join
 
+#DcmFilter manages dicom library and applies a gaussian filter
 class DcmFilter:
     def __init__(self,path,sigma_value = 3):
         dicom_file = dicom.read_file(path)
@@ -15,6 +16,7 @@ class DcmFilter:
         self.filtered = gaussian_filter(self.original, sigma=sigma_value)
         self.ipp = dicom_file.ImagePositionPatient
 
+#DcmFilter manages dicom library and applies a rotation
 class DcmRotate:
     def __init__(self,path,angle = 180):
         dicom_file = dicom.read_file(path)
@@ -44,10 +46,10 @@ def check_ipp(dcm_1, dcm_2):
         return False
 
 #Given an array, save as image in jpeg format 
-def save_image(np_image, name):
+def save_image(np_image,folder,name):
     image = Image.fromarray(np_image)
     image.mode = 'I'
-    image.point(lambda i:i*(1./256)).convert('L').save(name)
+    image.point(lambda i:i*(1./256)).convert('L').save(folder + "/" + name)
 
 def main():
     sigma = 3
@@ -56,6 +58,11 @@ def main():
         raise IncorrectNumberArguments
 
     folder = sys.argv[1]
+    new_path = folder + "/residues"
+    
+    #Check if the folder 'residues' already exist
+    if not os.path.isdir(new_path):
+         os.makedirs(new_path)
 
     #Read .dcm images from input folder
     images = [f for f in listdir(folder) if isfile(join(folder, f)) and ".dcm" in f]
@@ -72,8 +79,8 @@ def main():
     unfiltered_residue = image_1.original - image_2.original
     filtered_residue = image_1.filtered - image_2.filtered
     
-    save_image(unfiltered_residue,join(folder,"unfiltered.jpeg"))
-    save_image(filtered_residue, join(folder,"filtered.jpeg"))
+    save_image(unfiltered_residue, new_path,"unfiltered.jpeg")
+    save_image(filtered_residue, new_path,"filtered.jpeg")
 
 if __name__ == "__main__":
     main()
